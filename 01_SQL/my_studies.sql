@@ -438,3 +438,61 @@ FROM
 ORDER BY points DESC
 LIMIT 3
 
+-- ---------JOINS------------
+
+SELECT 
+    *
+FROM
+    orders
+INNER JOIN customers
+ ON orders.customer_id = customers.customer_id
+ 
+ -- selecting columns from these two tables
+ 
+SELECT 
+	orders.customer_id,
+    order_id,
+    first_name,
+    last_name
+FROM
+    orders
+INNER JOIN customers
+ON orders.customer_id = customers.customer_id
+
+-- simplifying the code giving alias from the tables
+
+SELECT 
+	o.customer_id,
+    order_id,
+    first_name,
+    last_name
+FROM
+    orders AS o
+INNER JOIN customers AS c
+ON o.customer_id = c.customer_id
+
+-- Exercise 10:
+-- write a query to join the order_items table with the products table and return
+	-- product ID
+    -- product name
+    -- quantity
+    -- unit price
+-- NB: use alias to simplify the code
+
+SELECT 
+    oi.product_id,
+    prod.name AS product_name,
+    oi.quantity,
+    prod.unit_price
+FROM
+    sql_store.order_items AS oi
+JOIN
+    sql_store.products AS prod ON oi.product_id = prod.product_id
+    
+
+ 
+
+
+
+
+
