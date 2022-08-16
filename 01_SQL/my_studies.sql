@@ -489,6 +489,139 @@ FROM
 JOIN
     sql_store.products AS prod ON oi.product_id = prod.product_id
     
+-- ----------------- JOINING ACROSS DATABASES ------------
+
+SELECT 
+    p.name AS name,
+    oi.unit_price AS unit_price,
+    p.product_id AS product_id
+FROM
+    order_items AS oi
+        JOIN
+    sql_inventory.products AS p ON oi.product_id = p.product_id
+    
+-- Exercise
+
+-- Write a query and join the payments table with the payment_methods table as well as the clients 
+-- Produce a report that shows the payment with more details such as the name of the clients and the payment method
+-- NB: the tables are found in the sql_invoicing database
+
+SELECT
+	PY.client_id AS id_cliente,
+	CL.name as nome_cliente,
+    PY.invoice_id AS id_invoice,
+    PY.amount AS quantidade,
+    PM.name AS tipo_pagamento,
+    CL.city AS cidade
+FROM 
+	sql_invoicing.payments AS PY
+		JOIN sql_invoicing.clients AS CL ON PY.client_id = CL.client_id
+        JOIN sql_invoicing.payment_methods AS PM ON PY.payment_method = PM.payment_method_id
+ORDER BY
+	id_cliente ASC
+    
+-- ----------------- JOINING TABLE BY ITSELF ------------
+
+USE sql_hr;
+
+SELECT 
+    E.employee_id,
+    E.first_name,
+    M.first_name AS manager_name
+FROM
+    employees AS E
+        JOIN
+    employees AS M ON E.reports_to = M.employee_id
+    
+-- ----------------- JOINING ACROSS MULTIPLE TABLES ------------
+
+-- join orders with customers and order status table
+
+USE sql_store;
+
+SELECT 
+    o.order_id,
+    o.order_date,
+    c.first_name,
+    c.last_name,
+    o.status AS status,
+    os.name AS status_meaning
+FROM
+    orders AS o
+        JOIN
+    customers AS c ON o.customer_id = c.customer_id
+        JOIN
+    order_statuses AS os ON o.status = os.order_status_id
+    
+-- ----------------- OUTER JOIN ------------
+
+-- LEFT JOIN
+SELECT 
+	c.customer_id,
+    c.first_name,
+    o.order_id
+FROM 
+	customers AS c
+LEFT JOIN 
+	orders AS o ON c.customer_id = o.customer_id
+    
+-- 
+
+SELECT 
+	cus.customer_id,
+    cus.first_name,
+    ord.order_id
+FROM 
+	customers AS cus
+RIGHT JOIN 
+	orders AS ord ON cus.customer_id = ord.customer_id
+    
+-- EXERCISE 12
+-- Write a query that produces a table with the following results:
+	-- product_id, name(i.e, name of product), quantity (you can get that from the order items)
+    -- return the product even if it has never been ordered
+    
+SELECT
+	p.product_id,
+    p.name,
+    oi.quantity
+    
+FROM 
+	sql_store.products AS p
+LEFT JOIN 
+	sql_store.order_items AS oi 
+		ON p.product_id = oi.product_id 
+        
+-- EXERCISE 13
+	-- using the sql_invoicing database, write a query that returns:
+    -- date
+    -- amount
+    -- client
+    -- name (i.e name of payment method)
+
+SELECT 
+    P.date,
+	P.amount,
+    C.name AS client,
+    PM.name AS payment_method
+FROM
+    sql_invoicing.payments AS P
+        JOIN
+    sql_invoicing.clients AS C USING (client_id)
+        JOIN
+    sql_invoicing.payment_methods AS PM ON P.payment_method = PM.payment_method_id
+
+
+
+
+
+
+	
+
+
+    
+
+    
 
  
 
