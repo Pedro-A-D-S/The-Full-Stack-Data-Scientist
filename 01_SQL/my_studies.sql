@@ -609,7 +609,386 @@ FROM
         JOIN
     sql_invoicing.clients AS C USING (client_id)
         JOIN
-    sql_invoicing.payment_methods AS PM ON P.payment_method = PM.payment_method_id
+    sql_invoicing.payment_methods AS PM ON P.payment_method = PM.payment_method_id;
+    
+-- INSERTING into a single row
+
+SELECT *
+FROM customers
+
+LIMIT 12;
+
+INSERT INTO sql_store.customers (customer_id, first_name, last_name, birth_date, phone, address, city, state, points)
+
+VALUES (DEFAULT, 'Jhon', 'smith', '1990-01-01', NULL, 'address', 'city', 'CA', DEFAULT);
+
+
+-- Inserting into multiple rows
+
+INSERT INTO sql_store.shippers
+
+VALUES (DEFAULT, 'shippers1'),
+		(DEFAULT, 'shippers2'),
+        (DEFAULT, 'shippers3'),
+        (DEFAULT, 'shippers4');
+
+SELECT * FROM sql_store.shippers;
+
+-- Creating a copy of a table
+
+CREATE TABLE new_orders AS
+SELECT * FROM orders;
+
+SELECT * FROM new_orders;
+
+INSERT INTO new_orders
+
+SELECT * FROM orders
+WHERE order_date < '2019-01-01';
+
+-- Updating an existing table
+
+SELECT * FROM sql_invoicing.payments;
+
+UPDATE sql_invoicing.payments
+SET date = '2018-08-01', amount = 40.02, payment_method = 1
+WHERE payment_id = 2;
+
+UPDATE sql_invoicing.invoices
+SET payment_total = 10, payment_date = due_date
+WHERE invoice_id = 5;
+
+-- UPDATE multiple records in existing table
+
+SELECT * FROM sql_invoicing.invoices;
+
+UPDATE sql_invoicing.invoices
+SET payment_total = 100
+WHERE client_id IN (5,3);
+
+-- ------------------------------------- VIEW ------------------------------------
+
+SELECT * FROM sql_hr.employees;
+
+
+-- In order to create a new view, it's necessary to indicate where it'll be done
+
+CREATE VIEW new_employees AS
+    SELECT 
+        *
+    FROM
+        sql_hr.employees
+    WHERE
+        job_title NOT LIKE '%VP%'
+            AND reports_to IS NOT NULL;
+            
+-- USING views
+
+SELECT 
+    first_name,
+    last_name,
+    salary,
+    FORMAT((salary * 0.05 + salary), 1) AS salary_increase
+FROM
+    new_employees;
+
+-- Alter SQL view
+
+ALTER VIEW new_employees AS
+    SELECT 
+        *
+    FROM
+        sql_hr.employees
+    WHERE
+        job_title NOT LIKE '%VP%' AND reports_to IS NOT NULL AND salary > 70000;
+
+SELECT * FROM new_employees;
+
+-- DROP SQL View
+
+DROP VIEW new_employees;
+
+-- Functions
+
+USE sql_hr;
+
+
+-- Creating new employee table
+
+CREATE TABLE new_employee(
+name VARCHAR(45) NOT NULL,
+occupation VARCHAR(35) NOT NULL,
+working_date DATE,
+working_hours VARCHAR(10)
+);
+
+INSERT INTO new_employee
+VALUES
+		('Robin', 'Scientist', '2020-10-04', 6),
+        ('Warner', 'Engineer', '2020-10-04', 7),
+        ('Peter', 'Actor', '2020-10-04', 13),
+        ('Marco', 'Engineer', '2020-10-04', 11),
+        ('Brayden', 'Teacher', '2020-10-04', 9),
+        ('Antonio', 'Business', '2020-10-04', 11);
+        
+SELECT * FROM new_employee;
+
+-- COUNT() Function
+
+SELECT 
+    COUNT(name)
+FROM
+    sql_hr.new_employee;
+    
+-- SUM() Function
+
+SELECT 
+    SUM(working_hours)
+FROM
+    sql_hr.new_employee;
+
+-- AVG() Function
+
+SELECT 
+    AVG(working_hours)
+FROM
+    sql_hr.new_employee;
+
+-- Combined functions
+
+SELECT 
+    COUNT(name) AS count,
+    MIN(working_hours) AS minimum_hours,
+    MAX(working_hours) AS maximum_hours,
+    AVG(working_hours) AS average_hours
+FROM
+    sql_hr.new_employee;
+
+-- Count function in details
+
+-- Count with where
+
+SELECT 
+    COUNT(*)
+FROM
+    sql_hr.new_employee
+WHERE
+    working_hours > 10;
+    
+-- COUNT with DISTINCT
+
+SELECT COUNT(DISTINCT occupation) AS number_of_occupations
+FROM sql_hr.new_employee;
+
+-- HAVING() function
+
+SELECT * FROM sql_store.customers;
+
+SELECT first_name, last_name, points, phone
+FROM sql_store.customers
+HAVING points > 1000;
+
+-- LENGTH Function
+
+-- CHAR_LENGTH(), CHARACTER_LENGTH()
+
+SELECT 
+    first_name, LENGTH(first_name) AS length_of_name
+FROM
+    sql_hr.employees;
+            
+SELECT 
+    first_name, LENGTH(first_name) AS length_of_name, CHAR_LENGTH(first_name), CHARACTER_LENGTH(first_name)
+FROM
+    sql_hr.employees;
+    
+-- CONCAT() Function
+
+SELECT CONCAT(first_name,' ', last_name, ' ', salary)
+FROM
+    sql_hr.employees;
+    
+-- FORMAT() Function
+
+SELECT salary, FORMAT(salary, 0) AS formated
+FROM sql_hr.employees;
+
+-- INSERT() Function
+
+SELECT INSERT('abcEGF', 4, 3, 'def');
+
+SELECT * FROM sql_hr.employees;
+
+SELECT job_title, INSERT(job_title, 8, 10, ' General')
+FROM sql_hr.employees
+WHERE employee_id = 33391;
+
+-- LOCATE() Function
+
+SELECT employee_id, job_title, LOCATE('executive', job_title)
+FROM sql_hr.employees;
+
+SELECT employee_id, job_title, INSERT(job_title, 8, 9, 'Manager')
+FROM sql_hr.employees
+WHERE employee_id = 80529;
+
+-- UCASE(): UPPER CASE
+-- LCASE(): lower case
+
+SELECT 
+    job_title,
+    first_name,
+    last_name,
+    LCASE(job_title),
+    UCASE(first_name)
+FROM
+    sql_hr.employees;
+    
+-- ----------------------- STORED PROCEDURE -------------------------
+
+SELECT
+	first_name
+FROM 
+	sql_hr.employees
+WHERE
+	employee_id = 3;
+
+CREATE PROCEDURE test()
+
+SELECT 
+    *
+FROM
+    sql_store.orders
+WHERE
+    order_date > '2018-01-01';
+
+CALL test();
+
+-- Stored Procedure with a single parameter
+
+USE sql_hr;
+
+CREATE PROCEDURE test1(office_id INT)
+
+SELECT
+	office_id,
+    first_name,
+    last_name,
+    job_title,
+    salary
+FROM employees;
+
+CALL test1(3);
+
+-- Stored procedure with multi parameter
+
+USE sql_hr;
+
+CREATE PROCEDURE test3(id INT, sal DECIMAL)
+
+SELECT
+	office_id,
+    first_name,
+    last_name,
+    job_title,
+    salary
+FROM 
+	employees
+WHERE
+	office_id = id AND
+    salary > sal;
+    
+CALL test3(1, 63000);
+
+-- Alter Stored Procedure
+
+-- DROP Stored Procedure
+
+DROP PROCEDURE test1;
+
+-- --------------------------- Triggers ---------------------
+
+-- BEFORE insert triggers
+
+USE sql_store;
+
+CREATE TRIGGER new_price
+
+BEFORE INSERT
+ON products
+FOR EACH ROW
+
+SET NEW.unit_price = NEW.unit_price - NEW.unit_price * 0.1;
+
+--
+
+INSERT INTO products
+VALUES(DEFAULT, 'BOOKS', 30, 50.0);
+
+SELECT * FROM sql_store.products
+
+LIMIT 100;
+
+-- Alter Insert Trigger
+
+USE sql_store;
+
+CREATE TRIGGER status_trigger
+
+AFTER INSERT
+ON orders
+FOR EACH ROW
+
+INSERT order_statuses(order_status_id, name)
+VALUES(order_status_id, 'order unsuccessful');
+
+INSERT INTO orders(order_id, customer_id, order_date, comments, shipped_date, shipper_id)
+VALUES(DEFAULT, 2, '2019-04-07', 'order was not successful', '2019-04-07', 3);
+
+-- DROP triggers
+
+DROP TRIGGER new_price;
+
+-- -------------------------------- Transactions -----------------------------
+
+USE sql_hr;
+
+CREATE TABLE Accounts(
+id INT,
+AccountName VARCHAR(10),
+AccountBalace DECIMAL(6, 3)
+);
+
+INSERT INTO Accounts
+VALUES 
+	(1, 'John', 300),
+    (2, 'Nancy', 800);
+    
+SELECT * FROM Accounts;
+
+START TRANSACTION;
+		UPDATE Accounts
+			SET AccountBalace = AccountBalace - 100
+            WHERE id = 1;
+		UPDATE Accounts
+			SET AccountBalace = AccountBalace + 100
+            WHERE id = 2
+            COMMIT;
+            
+-- 
+
+
+START TRANSACTION;
+		UPDATE Accounts
+			SET AccountBalace = AccountBalace - 100
+            WHERE id = 1;
+		UPDATE Accounts
+			SET AccountBalace = AccountBalace + 100
+            WHERE id = 2
+            COMMIT;
+
+
+
 
 
 
